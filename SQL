@@ -1,0 +1,165 @@
+## Check the date range of dailyActivity.
+SELECT
+  MIN(ActivityDate) AS startDate,
+  MAX(ActivityDate) AS endDate
+FROM
+  tracker_data.dailyActivity
+## Returns 2016-04-12 to 2016-05-12
+
+## Check the date range of sleepDay.
+SELECT
+  MIN(SleepDay) AS startDate,
+  MAX(SleepDay) AS endDate
+FROM
+  tracker_data.sleepDay
+## Returns 2016-04-12 to 2016-05-12
+
+## Check how many distinct Ids we have in dailyActivity.
+SELECT 
+    COUNT(DISTINCT Id)
+FROM
+  tracker_data.dailyActivity
+## Returns 33
+
+## Check how many distinct Ids we have in sleepDay.
+SELECT 
+    COUNT(DISTINCT Id)
+FROM 
+    tracker_data.sleepDay
+## Returns 24
+
+## Check how many rows of data we have in dailyActivity.
+SELECT
+  COUNT(*)
+FROM
+  tracker_data.dailyActivity
+## Returns 940
+
+## Check how many rows of data we have in sleepDay.
+SELECT
+  COUNT(*)
+FROM
+  tracker_data.sleepDay
+## Returns 413
+
+## Checking the length of IDs in dailyActivity.
+SELECT
+  LENGTH(Id)
+FROM
+  tracker_data.dailyActivity 
+
+## Make sure all Id's in DailyActivity are exactly length=10
+SELECT
+  Id
+FROM
+  tracker_data.dailyActivity
+WHERE
+  LENGTH(Id) > 10
+  OR LENGTH(Id) < 10
+## Nothing returned. All Id's have length 10
+
+## Making sure all Id's in sleepDay are exaclty length=10
+SELECT
+  Id
+FROM
+  tracker_data.sleepDay
+WHERE
+  LENGTH(Id) > 10
+  OR LENGTH(Id) < 10
+## Nothing returned. All Id's have length 10
+
+# Checking for duplicate rows in DailyActivity
+SELECT
+  ID,
+  ActivityDate,
+  COUNT(*) AS rowsCounted
+FROM
+  tracker_data.dailyActivity
+GROUP BY
+  Id,
+  ActivityDate 
+HAVING
+  rowsCounted > 1
+## No duplicates
+
+## Checking for duplicates in sleepDay
+SELECT *,
+  COUNT(*) AS rowsCounted
+FROM
+  tracker_data.sleepDay
+GROUP BY
+  Id,
+  SleepDay,
+  TotalSleepRecords,
+  TotalTimeInBed,
+  TotalMinutesAsleep
+HAVING
+  rowsCounted > 1
+## Returns 3 duplicate rows
+
+## Deleting duplicate rows in sleepDay
+DELETE FROM tracker_data.sleepDay
+WHERE Id not in (
+    SELECT MAX(Id)
+    FROM tracker_data.sleepDay
+    GROUP BY
+        Id,
+        SleepDay,
+        TotalSleepRecords,
+        TotalTimeInBed,
+        TotalMinutesAsleep
+)
+
+## Double Checking sleepDay doesn't have duplicates
+SELECT
+  *,
+  COUNT(*) AS numRow
+FROM
+  SleepLog2
+GROUP BY
+  Id,
+  SleepDay,
+  TotalSleepRecords,
+  TotalTimeInBed,
+  TotalMinutesAsleep
+HAVING
+  numRow > 1
+## No duplicates
+
+
+## Analyzing our data. Calculatings sums.
+SELECT
+  SUM(VeryActiveMinutes) AS totalVAM
+FROM
+  tracker_data.dailyActivity
+## Returns 19895
+
+SELECT
+  SUM(SedentaryMinutes) AS totalSM
+FROM
+  tracker_data.dailyActivity
+## Returns 931738
+
+SELECT
+  SUM(FairlyActiveMinutes) AS totalFAM
+FROM
+  tracker_data.dailyActivity
+## Returns 12751
+
+SELECT
+  SUM(LightlyActiveMinutes) AS totalLAM
+FROM
+  tracker_data.dailyActivity
+## Returns 181244
+
+SELECT
+  SUM(TotalMinutesAsleep) AS sumMinsAsleep
+FROM
+  tracker_data.sleepDay
+## Returns 173240
+
+SELECT
+  SUM(TotalTimeInBed) AS sumMinsInBed
+FROM
+  tracker_data.sleepDay
+## Returns 189418
